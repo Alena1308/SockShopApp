@@ -1,6 +1,7 @@
 package sky.course3.sockshopapp.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,8 +24,9 @@ public class SocksController {
     public SocksController(SocksService socksService) {
         this.socksService = socksService;
     }
+
     @PostMapping
-    @Operation(summary = "Добавление носков")
+    @Operation(summary = "Добавление новых носков")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200", description = "Носки добавлены", content = {
@@ -37,9 +39,30 @@ public class SocksController {
         return ResponseEntity.ok().body(id);
         // Написать исключение если данные введены не веррно
     }
+
     @PutMapping("/sale")
-    public ResponseEntity<Boolean>removeSocks(@Valid @RequestBody Socks socks){
-        if(socksService.removeSocks(socks)){
+    public ResponseEntity<Boolean> removeSocks(@Valid @RequestBody Socks socks) {
+        if (socksService.removeSocks(socks)) {
+            return ResponseEntity.ok().body(true);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{color}&{size}&{cottonMin}&{cottonMax}")
+    public ResponseEntity<Long> getAllSocksFromMinToMaxCotton(@PathVariable @RequestParam(name = "Белый")
+                                                              @Parameter(description = "Name of color in Russian") String color,
+                                                              @PathVariable @RequestParam(name = "35")
+                                                              @Parameter(description = "Number of size") Double size,
+                                                              @PathVariable @Valid @RequestParam(name = "0")
+                                                              @Parameter(description = "Number of minimum cotton content") Integer cottonMin,
+                                                              @PathVariable @Valid @RequestParam(name = "100")
+                                                              @Parameter(description = "Number of maximum cotton content") Integer cottonMax) {
+        return ResponseEntity.ok(socksService.getAllContainsSocksMinMax(color, size, cottonMin, cottonMax));
+    }
+
+    @DeleteMapping("/defective")
+    public ResponseEntity<Boolean> deleteDefectiveSocks(@Valid @RequestBody Socks socks) {
+        if (socksService.deleteDefectiveSocks(socks)) {
             return ResponseEntity.ok().body(true);
         }
         return ResponseEntity.notFound().build();
