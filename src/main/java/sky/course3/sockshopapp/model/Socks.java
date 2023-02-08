@@ -17,6 +17,7 @@ public class Socks {
     @Max(value = 100, message = "should be <100")
     private int cottonPart;
     @Positive(message = "should be positive")
+    @Setter
     private long quantity;
 
     @Override
@@ -30,9 +31,5 @@ public class Socks {
     @Override
     public int hashCode() {
         return Objects.hash(color, size, cottonPart);
-    }
-    @Positive
-    public void setQuantity(long quantity) {
-        this.quantity = quantity;
     }
 }
