@@ -4,6 +4,9 @@ import sky.course3.sockshopapp.model.Color;
 import sky.course3.sockshopapp.model.Size;
 import sky.course3.sockshopapp.model.Socks;
 
+import java.io.IOException;
+import java.nio.file.Path;
+
 public interface SocksService {
     long postNewSocks(Socks socks);
 
@@ -16,4 +19,6 @@ public interface SocksService {
     long getAllContainsSocksMax(String color, Double size, Integer cottonMax);
 
     boolean deleteDefectiveSocks(Socks defectiveSocks);
+
+    Path getAllFile() throws IOException;
 }

@@ -4,11 +4,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
-import sky.course3.sockshopapp.model.Color;
-import sky.course3.sockshopapp.model.Size;
+import org.webjars.NotFoundException;
+import sky.course3.sockshopapp.exceptions.FileProcessingException;
+import sky.course3.sockshopapp.exceptions.InvalidValueException;
+import sky.course3.sockshopapp.exceptions.NotEnoughSocksException;
 import sky.course3.sockshopapp.model.Socks;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 @Service
@@ -30,23 +37,19 @@ public class SocksServiceImpl implements SocksService {
 
     @Override
     public long postNewSocks(Socks socks) {
-        if(!socksMap.isEmpty()){
+        if(socksMap.isEmpty() || !socksMap.containsValue(socks)) {
+            socksMap.put(id, socks);
+            saveToFile();
+            return id++;
+        } else {
             for (Socks oldSocks : socksMap.values()) {
                 if (oldSocks.equals(socks)) {
                     oldSocks.setQuantity(oldSocks.getQuantity() + socks.getQuantity());
                     return findKeyFromMap(socks);
-                } else {
-                    socksMap.put(id, socks);
-                    saveToFile();
-                    return id++;
                 }
             }
-        } else {
-            socksMap.put(id, socks);
-            saveToFile();
-            return id++;
         }
-        throw new RuntimeException();
+        throw new InvalidValueException("Параметры введены некорректно");
     }
 
     @Override
@@ -56,10 +59,10 @@ public class SocksServiceImpl implements SocksService {
                 socks.setQuantity(socks.getQuantity() - neededSocks.getQuantity());
                 saveToFile();
                 return true;
-            }
-            if (socks.equals(neededSocks) && socks.getQuantity() < neededSocks.getQuantity()) {
-                return false;
-//                throw new RuntimeException("На складе меньше количество, чем нужно забрать");
+            } else if (socks.equals(neededSocks) && socks.getQuantity() < neededSocks.getQuantity()) {
+                throw new NotEnoughSocksException("Имеется недостаточное количество носков");
+            } else if (!socks.equals(neededSocks)){
+                throw new NotFoundException("Носки с заданными параметрами н найдены");
             }
         }
         return false;
@@ -121,6 +124,20 @@ public class SocksServiceImpl implements SocksService {
         }
         return false;
     }
+    @Override
+    public Path getAllFile() throws IOException {
+        Path path = filesService.createTempFile("allSocks");
+        try(Writer writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)){
+            for (Socks socks : socksMap.values()) {
+                writer.append("Цвет носков: " + socks.getColor().getNamesColor()+"\n"
+                        +"Размер: " + Arrays.toString(socks.getSize().getRussianSize()) +"\n"
+                        +"Содержание хлопка: "+ socks.getCottonPart() + " %" + "\n"
+                        +"Количество на складе: " + socks.getQuantity() + " пар");
+                writer.append("\n\n");
+            }
+        }
+        return path;
+    }
 
     private long findKeyFromMap(Socks socks) {
         for (Map.Entry<Long, Socks> pair : socksMap.entrySet()) {
@@ -145,8 +162,8 @@ public class SocksServiceImpl implements SocksService {
         try {
             socksMap = new ObjectMapper().readValue(json, new TypeReference<Map<Long, Socks>>() {
             });
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new FileProcessingException("не удалось прочитать файл");
         }
     }
 }

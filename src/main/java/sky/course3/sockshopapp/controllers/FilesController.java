@@ -18,6 +18,8 @@ import sky.course3.sockshopapp.services.SocksService;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 @RestController
 @RequestMapping("/files")
@@ -30,7 +32,7 @@ public class FilesController {
         this.filesService = filesService;
         this.socksService = socksService;
     }
-    @GetMapping(value = "/export", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping("/exportSocks")
     @Operation(summary = "Получение файла наличия носков")
     @ApiResponses(value = {
             @ApiResponse(
@@ -38,17 +40,21 @@ public class FilesController {
                     @Content(mediaType = "application/json")
             }
             )})
-    public ResponseEntity<InputStreamResource> dowloadDataFile() throws FileNotFoundException {
-        File file = filesService.getDataFile();
-        if(file.exists()){
-            InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+    public ResponseEntity<Object> getAllFile() {
+        try {
+            Path path = socksService.getAllFile();
+            if (Files.size(path) == 0) {
+                return ResponseEntity.noContent().build();
+            }
+            InputStreamResource resource = new InputStreamResource(new FileInputStream(path.toFile()));
             return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .contentLength(file.length())
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"Socks.json\"")
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .contentLength(Files.size(path))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"Socks File.json\"")
                     .body(resource);
-        }else {
-            return ResponseEntity.noContent().build();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(e.toString());
         }
     }
 }

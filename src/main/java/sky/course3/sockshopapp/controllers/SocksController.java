@@ -35,20 +35,31 @@ public class SocksController {
             }
             )})
     public ResponseEntity<Long> postNewSocks(@Valid @RequestBody Socks socks) {
-        long id = socksService.postNewSocks(socks);
-        return ResponseEntity.ok().body(id);
-        // Написать исключение если данные введены не веррно
+        return ResponseEntity.ok(socksService.postNewSocks(socks));
     }
 
     @PutMapping("/sale")
+    @Operation(summary = "Отправка носков")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200", description = "Носки отправлены", content = {
+                    @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = Socks.class)))
+            }
+            )})
     public ResponseEntity<Boolean> removeSocks(@Valid @RequestBody Socks socks) {
-        if (socksService.removeSocks(socks)) {
-            return ResponseEntity.ok().body(true);
-        }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(socksService.removeSocks(socks));
     }
 
     @GetMapping("/{color}&{size}&{cottonMin}&{cottonMax}")
+    @Operation(summary = "Запрос наличия носков по параметрам")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200", description = "Носки найдены", content = {
+                    @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = Socks.class)))
+            }
+            )})
     public ResponseEntity<Long> getAllSocksFromMinToMaxCotton(@PathVariable @RequestParam(name = "Белый")
                                                               @Parameter(description = "Name of color in Russian") String color,
                                                               @PathVariable @RequestParam(name = "35")
@@ -61,10 +72,15 @@ public class SocksController {
     }
 
     @DeleteMapping("/defective")
+    @Operation(summary = "Списывание бракованных носков")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200", description = "Носки списаны", content = {
+                    @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = Socks.class)))
+            }
+            )})
     public ResponseEntity<Boolean> deleteDefectiveSocks(@Valid @RequestBody Socks socks) {
-        if (socksService.deleteDefectiveSocks(socks)) {
-            return ResponseEntity.ok().body(true);
-        }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(socksService.deleteDefectiveSocks(socks));
     }
 }

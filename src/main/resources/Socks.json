@@ -3,18 +3,24 @@
     "color": "WHITE",
     "size": "XS",
     "cottonPart": 100,
-    "quantity": 120
+    "quantity": 0
   },
   "2": {
     "color": "WHITE",
-    "size": "XS",
-    "cottonPart": 70,
-    "quantity": 10
+    "size": "S",
+    "cottonPart": 10,
+    "quantity": 30
   },
   "3": {
     "color": "WHITE",
+    "size": "L",
+    "cottonPart": 10,
+    "quantity": 110
+  },
+  "4": {
+    "color": "WHITE",
     "size": "XS",
-    "cottonPart": 70,
-    "quantity": 15
+    "cottonPart": 10,
+    "quantity": 100
   }
 }
