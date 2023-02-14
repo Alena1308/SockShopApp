@@ -14,5 +14,13 @@
     "size": "XS",
     "cottonPart": 100,
     "quantity": 500
+  },
+  "3": {
+    "operationType": "IN",
+    "date": 1676373975011,
+    "color": "WHITE",
+    "size": "XS",
+    "cottonPart": 100,
+    "quantity": 8
   }
 }

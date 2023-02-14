@@ -5,12 +5,16 @@ import lombok.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Positive;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Objects;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 public class Socks {
+    private OperationType operationType;
+    private Date date = new Date();
     private Color color;
     private Size size;
     @Min(value = 0, message = "should be >0")
@@ -19,6 +23,7 @@ public class Socks {
     @Positive(message = "should be positive")
     @Setter
     private long quantity;
+
 
     @Override
     public boolean equals(Object o) {

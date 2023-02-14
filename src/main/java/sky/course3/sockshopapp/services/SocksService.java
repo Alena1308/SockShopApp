@@ -1,13 +1,13 @@
 package sky.course3.sockshopapp.services;
 
-import sky.course3.sockshopapp.model.Color;
-import sky.course3.sockshopapp.model.Size;
 import sky.course3.sockshopapp.model.Socks;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
 public interface SocksService {
+    Object sortSocks(Socks newSocks);
+
     long postNewSocks(Socks socks);
 
     boolean removeSocks(Socks socks);
@@ -21,4 +21,8 @@ public interface SocksService {
     boolean deleteDefectiveSocks(Socks defectiveSocks);
 
     Path getAllFile() throws IOException;
+
+    Path getAllFileIn() throws IOException;
+
+    Path getAllFileOut() throws IOException;
 }
