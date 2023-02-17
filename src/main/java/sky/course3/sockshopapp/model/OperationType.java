@@ -9,6 +9,7 @@ public enum OperationType {
     OperationType(String operation) {
         this.operation = operation;
     }
+
     public String getOperation() {
         return operation;
     }

@@ -1,0 +1,32 @@
+{
+  "1": {
+    "operationType": "IN",
+    "date": 1676653093231,
+    "sock": {
+      "color": "WHITE",
+      "size": "XS",
+      "cottonPart": 100,
+      "quantity": 1100
+    }
+  },
+  "2": {
+    "operationType": "IN",
+    "date": 1676653101654,
+    "sock": {
+      "color": "WHITE",
+      "size": "XS",
+      "cottonPart": 100,
+      "quantity": 100
+    }
+  },
+  "3": {
+    "operationType": "IN",
+    "date": 1676653115459,
+    "sock": {
+      "color": "BLUE",
+      "size": "S",
+      "cottonPart": 100,
+      "quantity": 100
+    }
+  }
+}

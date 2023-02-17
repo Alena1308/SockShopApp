@@ -78,6 +78,7 @@ public class SocksController {
                                                                       example = "100") Integer cottonMax) {
         return ResponseEntity.ok(socksService.getAllContainsSocksMinMax(color, size, cottonMin, cottonMax));
     }
+
     @GetMapping("/{color}&{size}&{cottonMin}")
     @Operation(summary = "Запрос наличия носков по параметрам Min")
     @ApiResponses(value = {
@@ -88,19 +89,20 @@ public class SocksController {
             }
             )})
     public ResponseEntity<Long> getAllSocksFromMinCotton(@PathVariable @RequestParam(name = "Color")
-                                                              @Parameter(name = "Color",
-                                                                      description = "Name of color in Russian",
-                                                                      example = "Белый") String color,
-                                                              @PathVariable @RequestParam(name = "Size")
-                                                              @Parameter(name = "Size",
-                                                                      description = "Number of size",
-                                                                      example = "35.5") Double size,
-                                                              @PathVariable @Valid @RequestParam(name = "Min cotton")
-                                                              @Parameter(name = "Min cotton",
-                                                                      description = "Number of minimum cotton content, %",
-                                                                      example = "0") Integer cottonMin){
+                                                         @Parameter(name = "Color",
+                                                                 description = "Name of color in Russian",
+                                                                 example = "Белый") String color,
+                                                         @PathVariable @RequestParam(name = "Size")
+                                                         @Parameter(name = "Size",
+                                                                 description = "Number of size",
+                                                                 example = "35.5") Double size,
+                                                         @PathVariable @Valid @RequestParam(name = "Min cotton")
+                                                         @Parameter(name = "Min cotton",
+                                                                 description = "Number of minimum cotton content, %",
+                                                                 example = "0") Integer cottonMin) {
         return ResponseEntity.ok(socksService.getAllContainsSocksMin(color, size, cottonMin));
     }
+
     @GetMapping("/{color}&{size}&{cottonMax}")
     @Operation(summary = "Запрос наличия носков по параметрам Max")
     @ApiResponses(value = {
@@ -111,17 +113,17 @@ public class SocksController {
             }
             )})
     public ResponseEntity<Long> getAllSocksMaxCotton(@PathVariable @RequestParam(name = "Color")
-                                                              @Parameter(name = "Color",
-                                                                      description = "Name of color in Russian",
-                                                                      example = "Белый") String color,
-                                                              @PathVariable @RequestParam(name = "Size")
-                                                              @Parameter(name = "Size",
-                                                                      description = "Number of size",
-                                                                      example = "35.5") Double size,
-                                                              @PathVariable @Valid @RequestParam(name = "Max cotton")
-                                                              @Parameter(name = "Max cotton",
-                                                                      description = "Number of maximum cotton content, %",
-                                                                      example = "100") Integer cottonMax) {
+                                                     @Parameter(name = "Color",
+                                                             description = "Name of color in Russian",
+                                                             example = "Белый") String color,
+                                                     @PathVariable @RequestParam(name = "Size")
+                                                     @Parameter(name = "Size",
+                                                             description = "Number of size",
+                                                             example = "35.5") Double size,
+                                                     @PathVariable @Valid @RequestParam(name = "Max cotton")
+                                                     @Parameter(name = "Max cotton",
+                                                             description = "Number of maximum cotton content, %",
+                                                             example = "100") Integer cottonMax) {
         return ResponseEntity.ok(socksService.getAllContainsSocksMax(color, size, cottonMax));
     }
 
@@ -137,16 +139,5 @@ public class SocksController {
     public ResponseEntity<Boolean> deleteDefectiveSocks(@Valid @RequestBody Socks socks) {
         return ResponseEntity.ok(socksService.deleteDefectiveSocks(socks));
     }
-    @PutMapping("/sort")
-    @Operation(summary = "Добавление, отправка, списывание носков")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200", description = "Изменения учтены на складе", content = {
-                    @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = Socks.class)))
-            }
-            )})
-    public ResponseEntity<Object> sortSocksByType(@Valid @RequestBody Socks socks) {
-        return ResponseEntity.ok(socksService.sortSocks(socks));
-    }
+
 }

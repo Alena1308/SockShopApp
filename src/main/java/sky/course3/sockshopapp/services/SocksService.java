@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public interface SocksService {
-    Object sortSocks(Socks newSocks);
 
     long postNewSocks(Socks socks);
 
@@ -22,7 +21,4 @@ public interface SocksService {
 
     Path getAllFile() throws IOException;
 
-    Path getAllFileIn() throws IOException;
-
-    Path getAllFileOut() throws IOException;
 }

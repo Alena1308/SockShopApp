@@ -50,6 +50,7 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
     public String handleotFoundExceptions(NotEnoughSocksException ex) {
         return ex.getMessage();
     }
+
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NotFoundException.class)
     public String handleotFoundExceptions(NotFoundException ex) {

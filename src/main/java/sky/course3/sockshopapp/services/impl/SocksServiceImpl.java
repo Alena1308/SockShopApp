@@ -1,8 +1,9 @@
-package sky.course3.sockshopapp.services;
+package sky.course3.sockshopapp.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 import sky.course3.sockshopapp.exceptions.FileProcessingException;
@@ -10,6 +11,10 @@ import sky.course3.sockshopapp.exceptions.InvalidValueException;
 import sky.course3.sockshopapp.exceptions.NotEnoughSocksException;
 import sky.course3.sockshopapp.model.OperationType;
 import sky.course3.sockshopapp.model.Socks;
+import sky.course3.sockshopapp.model.SocksTransaction;
+import sky.course3.sockshopapp.services.FilesService;
+import sky.course3.sockshopapp.services.SocksService;
+import sky.course3.sockshopapp.services.SocksTransactionsService;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -22,55 +27,36 @@ import java.util.*;
 @Service
 public class SocksServiceImpl implements SocksService {
     private static long id = 1;
-    private static long idIn = 1;
-    private static long idOut = 1;
     private static long idOff = 1;
     private static Map<Long, Socks> socksMap = new HashMap<>();
     private static Map<Long, Socks> defectiveMap = new HashMap<>();
-    private static Map<Long, Socks> infoSocksMapIn = new HashMap<>();
-    private static Map<Long, Socks> infoSocksMapOut = new HashMap<>();
     final private FilesService filesService;
+    final private SocksTransactionsService socksTransactionsService;
 
-    public SocksServiceImpl(FilesService filesService) {
+    public SocksServiceImpl(@Qualifier("SocksFilesService") FilesService filesService,
+                            SocksTransactionsService socksTransactionsService) {
         this.filesService = filesService;
+        this.socksTransactionsService = socksTransactionsService;
     }
 
     @PostConstruct
     private void init() {
         readFromFile();
-        readFromFileIn();
-        readFromFileOut();
-    }
-
-    @Override
-    public Object sortSocks(Socks newSocks) {
-        if (newSocks.getOperationType().equals(OperationType.IN)) {
-            return postNewSocks(newSocks);
-        }
-        if (newSocks.getOperationType().equals(OperationType.OUT)) {
-            return removeSocks(newSocks);
-        }
-        if (newSocks.getOperationType().equals(OperationType.OFF)) {
-            return deleteDefectiveSocks(newSocks);
-        } else {
-            throw new InvalidValueException("Параметры введены некорректно");
-        }
     }
 
     @Override
     public long postNewSocks(Socks socks) {
-        infoSocksMapIn.put(idIn, socks);
-        idIn++;
-        saveToFileIn();
         if (socksMap.isEmpty() || !socksMap.containsValue(socks)) {
             socksMap.put(id, socks);
             saveToFile();
+            socksTransactionsService.addSocksTransactions(new SocksTransaction(OperationType.IN, new Date(), socks));
             return id++;
         } else {
             for (Socks oldSocks : socksMap.values()) {
                 if (oldSocks.equals(socks)) {
                     oldSocks.setQuantity(oldSocks.getQuantity() + socks.getQuantity());
                     saveToFile();
+                    socksTransactionsService.addSocksTransactions(new SocksTransaction(OperationType.IN, new Date(), socks));
                     return findKeyFromMap(socks);
                 }
             }
@@ -84,9 +70,7 @@ public class SocksServiceImpl implements SocksService {
             if (socks.equals(neededSocks) && socks.getQuantity() >= neededSocks.getQuantity()) {
                 socks.setQuantity(socks.getQuantity() - neededSocks.getQuantity());
                 saveToFile();
-                infoSocksMapOut.put(idOut, neededSocks);
-                idOut++;
-                saveToFileOut();
+                socksTransactionsService.addSocksTransactions(new SocksTransaction(OperationType.OUT, new Date(), neededSocks));
                 return true;
             } else if (socks.equals(neededSocks) && socks.getQuantity() < neededSocks.getQuantity()) {
                 throw new NotEnoughSocksException("Имеется недостаточное количество носков");
@@ -148,6 +132,7 @@ public class SocksServiceImpl implements SocksService {
                 defectiveMap.put(idOff, defectiveSocks);
                 idOff++;
                 saveToFile();
+                socksTransactionsService.addSocksTransactions(new SocksTransaction(OperationType.OFF, new Date(), socks));
                 return true;
             }
         }
@@ -160,39 +145,6 @@ public class SocksServiceImpl implements SocksService {
         try (Writer writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
             for (Socks socks : socksMap.values()) {
                 writer.append("Цвет носков: " + socks.getColor().getNamesColor() + "\n"
-                                + "Размер: " + Arrays.toString(socks.getSize().getRussianSize()) + "\n"
-                                + "Содержание хлопка: " + socks.getCottonPart() + " %" + "\n"
-                                + "Количество на складе: " + socks.getQuantity() + " пар");
-                writer.append("\n\n");
-            }
-        }
-        return path;
-    }
-
-    @Override
-    public Path getAllFileIn() throws IOException {
-        Path path = filesService.createTempFile("allSocksIn");
-        try (Writer writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
-            for (Socks socks : infoSocksMapIn.values()) {
-                writer.append("Тип операции: " + socks.getOperationType().getOperation() + "\n"
-                                + "Дата и время: " + socks.getDate().toString() + "\n"
-                                + "Цвет носков: " + socks.getColor().getNamesColor() + "\n"
-                                + "Размер: " + Arrays.toString(socks.getSize().getRussianSize()) + "\n"
-                                + "Содержание хлопка: " + socks.getCottonPart() + " %" + "\n"
-                                + "Количество на складе: " + socks.getQuantity() + " пар");
-                writer.append("\n\n");
-            }
-        }
-        return path;
-    }
-    @Override
-    public Path getAllFileOut() throws IOException {
-        Path path = filesService.createTempFile("allSocksOut");
-        try (Writer writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
-            for (Socks socks : infoSocksMapOut.values()) {
-                writer.append("Тип операции: " + socks.getOperationType().getOperation() + "\n"
-                        + "Дата и время: " + socks.getDate().toString() + "\n"
-                        + "Цвет носков: " + socks.getColor().getNamesColor() + "\n"
                         + "Размер: " + Arrays.toString(socks.getSize().getRussianSize()) + "\n"
                         + "Содержание хлопка: " + socks.getCottonPart() + " %" + "\n"
                         + "Количество на складе: " + socks.getQuantity() + " пар");
@@ -201,7 +153,6 @@ public class SocksServiceImpl implements SocksService {
         }
         return path;
     }
-
 
     private long findKeyFromMap(Socks socks) {
         for (Map.Entry<Long, Socks> pair : socksMap.entrySet()) {
@@ -220,6 +171,7 @@ public class SocksServiceImpl implements SocksService {
             throw new FileProcessingException(e);
         }
     }
+
     private void readFromFile() {
         String json = filesService.readFromFile();
         try {
@@ -230,39 +182,4 @@ public class SocksServiceImpl implements SocksService {
         }
     }
 
-    private void saveToFileIn() {
-        try {
-            String json = new ObjectMapper().writeValueAsString(infoSocksMapIn);
-            filesService.saveToFileIn(json);
-        } catch (JsonProcessingException e) {
-            throw new FileProcessingException(e);
-        }
-    }
-
-    private void readFromFileIn() {
-        String json = filesService.readFromFileIn();
-        try {
-            infoSocksMapIn = new ObjectMapper().readValue(json, new TypeReference<Map<Long, Socks>>() {
-            });
-        } catch (IOException e) {
-            throw new FileProcessingException("не удалось прочитать файл");
-        }
-    }
-    private void saveToFileOut() {
-        try {
-            String json = new ObjectMapper().writeValueAsString(infoSocksMapOut);
-            filesService.saveToFileOut(json);
-        } catch (JsonProcessingException e) {
-            throw new FileProcessingException(e);
-        }
-    }
-    private void readFromFileOut() {
-        String json = filesService.readFromFileOut();
-        try {
-            infoSocksMapOut = new ObjectMapper().readValue(json, new TypeReference<Map<Long, Socks>>() {
-            });
-        } catch (IOException e) {
-            throw new FileProcessingException("не удалось прочитать файл");
-        }
-    }
 }
