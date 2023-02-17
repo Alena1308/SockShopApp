@@ -1,0 +1,18 @@
+{
+  "1": {
+    "operationType": "IN",
+    "date": 1676373929453,
+    "color": "WHITE",
+    "size": "XS",
+    "cottonPart": 100,
+    "quantity": 100
+  },
+  "2": {
+    "operationType": "IN",
+    "date": 1676373943192,
+    "color": "GREEN",
+    "size": "XS",
+    "cottonPart": 100,
+    "quantity": 500
+  }
+}
